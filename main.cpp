@@ -79,34 +79,45 @@ const unsigned char PROGMEM T_arg[] =
   0x0E, 0x1B, 0x31, 0x66, 0xC6, 0x80, 0xD0, 0x60, 0x31, 0x1B, 0x0E, 0x00, 0x00, 0x38, 0x28, 0x38, 0x00, 0x01, 0x47, 0x1E, 0x38, 0x20, 0x20, 0x20, 0x20, 0x30, 0x10, 0x10, 0xD0, 0xD0, 0x10, 0x10, 0x90, 0x10, 0x30, 0x20, 0x20, 0x20, 0x20, 0x38, 0x1E, 0x07, 0x01, 0x00, 0x00, 0x06, 0x06, 0x00, 0x00, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 };
 
-const unsigned char testimg[] =
-{
-    0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 
-    0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 
-    0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 
-    0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 
-    0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 
-    0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 
-    0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 
-    0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 
-};
-
-Image test()
-{
-    Blob dblob(testimg, sizeof(testimg));
-    Image img(dblob, Geometry(8, 8), 8, "GRAY");
-    return img;
-}
+const uint8_t PROGMEM smilies[] = { 8, 16,
+                                    0b01111110, 0b10000001, 0b10010101, 0b10100001, 0b10100001, 0b10010101, 0b10000001, 0b01111110,
+                                    0b01111110, 0b10000001, 0b10100101, 0b10010001, 0b10010001, 0b10100101, 0b10000001, 0b01111110 };
 
 Image convert_arduboy(const unsigned char * data, size_t length)
 {
     int width = data[0];
     int height = data[1];
+    size_t imglength = width * height;
+    const uint8_t * imgreg = data + 2;
     
-    std::cout << width << "x" << height << " from " << (length - 2) << std::endl;
+    std::cout << width << "x" << height << " from " << (length - 2) << " to " << imglength << std::endl;
     
-    Blob dblob(data + 2, length - 2);
-    Image img(dblob, Geometry(width, height), "MONO");
+    uint8_t * workmem = new uint8_t[imglength];
+    for (size_t x = 0; x < width; x++)
+    {
+        for (size_t ybyte = 0; ybyte < height / 8; ybyte++)
+        {
+            uint8_t inbyte = imgreg[width * ybyte + x];
+            for (size_t ybit = 0; ybit < 8; ybit++)
+            {
+                size_t outidx = width * (ybyte * 8 + ybit) + x;
+                if (inbyte & 1)
+                {
+                    workmem[outidx] = 0x00;
+                }
+                else
+                {
+                    workmem[outidx] = 0xFF;
+                }
+                inbyte = inbyte >> 1;
+            }
+        }
+    }
+
+    Blob dblob(workmem, imglength);
+    delete[] workmem;
+
+    Image img(dblob, Geometry(width, height), 8, "GRAY");
     return img;
 }
 
@@ -117,8 +128,8 @@ int main(int argc,char **argv)
     InitializeMagick(*argv);
     
     //~ Image blank_image( Geometry(640, 480), Color(MaxRGB, 0, MaxRGB, 0));
-    //~ Image result = convert_arduboy(T_arg, sizeof(T_arg));
-    Image result = test();
+    Image result = convert_arduboy(T_arg, sizeof(T_arg));
+    //~ Image result = convert_arduboy(smilies, sizeof(smilies));
     
     result.write("test.png");
 
