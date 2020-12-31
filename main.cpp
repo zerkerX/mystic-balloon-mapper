@@ -1,4 +1,5 @@
 #include <Magick++.h>
+#include <list>
 #include <cstdint>
 #include <iostream>
 
@@ -10,16 +11,11 @@ typedef uint8_t byte;
 
 #include "bitmaps.h"
 
-Image load_arduboy(const unsigned char * data, size_t length)
+Image load_arduboy_frame(const uint8_t * imgreg, size_t width, size_t height)
 {
-    int width = data[0];
-    int height = data[1];
     size_t imglength = width * height;
-    const uint8_t * imgreg = data + 2;
-    
-    std::cout << width << "x" << height << " from " << (length - 2) << " to " << imglength << std::endl;
-    
     uint8_t * workmem = new uint8_t[imglength];
+
     for (size_t x = 0; x < width; x++)
     {
         for (size_t ybyte = 0; ybyte < height / 8; ybyte++)
@@ -48,17 +44,49 @@ Image load_arduboy(const unsigned char * data, size_t length)
     return img;
 }
 
+std::list<Image> load_arduboy(const uint8_t * data, size_t length)
+{
+    const size_t width = data[0];
+    const size_t height = data[1];
+    const uint8_t * imgreg = data + 2;
+    const size_t frame_size = (width * height) / 8;
+    const size_t data_length = length - 2;
+    const size_t num_frames = data_length / frame_size;
+    
+    std::list<Image> result;
+    
+    for (size_t i = 0; i < num_frames; i++)
+    {
+        const uint8_t * framereg = imgreg + frame_size * i;
+        result.push_back(load_arduboy_frame(framereg, width, height));
+    }
+
+    return result;
+}
+
 // http://www.imagemagick.org/Magick++/Documentation.html for help
 
 int main(int argc,char **argv)
 { 
     InitializeMagick(*argv);
     
-    load_arduboy(T_arg, sizeof(T_arg)).write("T_Arg.png");
-    load_arduboy(badgeMysticBalloon, sizeof(badgeMysticBalloon)).write("badgeMysticBalloon.png");
-    load_arduboy(qrcode, sizeof(qrcode)).write("qrcode.png");
-    load_arduboy(titleScreen, sizeof(titleScreen)).write("titleScreen.png");
-    load_arduboy(kidSprite, sizeof(kidSprite)).write("kidSprite.png");
+    std::list<Image> title = load_arduboy(titleScreen, sizeof(titleScreen));
+    writeImages(title.begin(), title.end(), "titleScreen.gif");
+
+    std::list<Image> kid = load_arduboy(kidSprite, sizeof(kidSprite));
+    writeImages(kid.begin(), kid.end(), "kidSprite.gif");
+
+    std::list<Image> walker = load_arduboy(walkerSprite, sizeof(walkerSprite));
+    writeImages(walker.begin(), walker.end(), "walkerSprite.gif");
+
+    std::list<Image> spikes = load_arduboy(sprSpikes, sizeof(sprSpikes));
+    writeImages(spikes.begin(), spikes.end(), "sprSpikes.gif");
+
+    std::list<Image> fanimg = load_arduboy(fan, sizeof(fan));
+    writeImages(fanimg.begin(), fanimg.end(), "fan.gif");
+
+    std::list<Image> tiles = load_arduboy(tileSetTwo, sizeof(tileSetTwo));
+    writeImages(tiles.begin(), tiles.end(), "tileSetTwo.gif");
 
     return 0;
 }
