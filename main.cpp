@@ -11,7 +11,7 @@ typedef uint8_t byte;
 
 #include "bitmaps.h"
 
-Image load_arduboy_frame(const uint8_t * imgreg, size_t width, size_t height)
+Image load_arduboy_frame(const uint8_t * imgreg, size_t width, size_t height, bool masked=false)
 {
     size_t imglength = width * height;
     uint8_t * workmem = new uint8_t[imglength];
@@ -26,11 +26,13 @@ Image load_arduboy_frame(const uint8_t * imgreg, size_t width, size_t height)
                 size_t outidx = width * (ybyte * 8 + ybit) + x;
                 if (inbyte & 1)
                 {
-                    workmem[outidx] = 0x00;
+                    if (masked) workmem[outidx] = 0x00;
+                    else        workmem[outidx] = 0xFF;
                 }
                 else
                 {
-                    workmem[outidx] = 0xFF;
+                    if (masked) workmem[outidx] = 0xFF;
+                    else        workmem[outidx] = 0x00;
                 }
                 inbyte = inbyte >> 1;
             }
@@ -44,7 +46,7 @@ Image load_arduboy_frame(const uint8_t * imgreg, size_t width, size_t height)
     return img;
 }
 
-std::list<Image> load_arduboy(const uint8_t * data, size_t length)
+std::list<Image> load_arduboy(const uint8_t * data, size_t length, bool masked=false)
 {
     const size_t width = data[0];
     const size_t height = data[1];
@@ -58,7 +60,7 @@ std::list<Image> load_arduboy(const uint8_t * data, size_t length)
     for (size_t i = 0; i < num_frames; i++)
     {
         const uint8_t * framereg = imgreg + frame_size * i;
-        result.push_back(load_arduboy_frame(framereg, width, height));
+        result.push_back(load_arduboy_frame(framereg, width, height, masked));
     }
 
     return result;
@@ -73,7 +75,7 @@ int main(int argc,char **argv)
     std::list<Image> title = load_arduboy(titleScreen, sizeof(titleScreen));
     writeImages(title.begin(), title.end(), "titleScreen.gif");
 
-    std::list<Image> kid = load_arduboy(kidSprite, sizeof(kidSprite));
+    std::list<Image> kid = load_arduboy(kidSprite, sizeof(kidSprite), true);
     writeImages(kid.begin(), kid.end(), "kidSprite.gif");
 
     std::list<Image> walker = load_arduboy(walkerSprite, sizeof(walkerSprite));
