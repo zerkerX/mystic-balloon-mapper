@@ -23,6 +23,12 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+Artwork Copyright @castpixel/Christina
+
+with CC-NC-BY license
+
+(from https://community.arduboy.com/t/team-arg-disappeared-how-to-get-their-games/8891/45 )
 */
 
 /* Modified to change binary representation to proper C++ expected format */
