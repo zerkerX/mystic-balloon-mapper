@@ -87,24 +87,16 @@ static std::vector<Image> walker;
 static std::vector<Image> fanimg;
 static std::vector<Image> spikes;
 
-Image generate_map(const uint8_t * map, size_t length)
+/* Static loaded map so we can easily share among several subroutines */
+static uint8_t mapdata[LEVEL_WIDTH_CELLS][LEVEL_HEIGHT_CELLS] = {0};
+
+void load_map_cells(const uint8_t * map)
 {
-    /* Image format is a block of tile data, followed by
-     * packged information on objects within the map.
-     * 
-     * Although the map has a scheme ending in 0xff, this
-     * function still takes the array length as a parameter for safety */
-     
-    /* Load the map first, because we will eventually need to compare
-     * adjacent tiles when rendering. 
-     * 
+    /* Just load the cell part of the map into map data
      * Reference algorithm:
      *   byte b = pgm_read_byte(lvl + (x >> 3) + (y * (LEVEL_WIDTH_CELLS >> 3)));
      *   return ((b >> (x % 8)) & 0x01);
-     * */
-       
-    uint8_t mapdata[LEVEL_WIDTH_CELLS][LEVEL_HEIGHT_CELLS] = {0};
-    
+     */
     for (size_t y = 0; y < LEVEL_HEIGHT_CELLS; y++)
     {
         for (size_t x = 0; x < LEVEL_WIDTH_CELLS; x++)
@@ -115,6 +107,48 @@ Image generate_map(const uint8_t * map, size_t length)
             mapdata[x][y] = (map[idx] >> bit) & 1;
         }
     }
+}
+
+/* Partially adapted from levels.h */
+bool gridGetSolid(int8_t x, int8_t y)
+{
+    if (x < 0 || x >= LEVEL_WIDTH_CELLS)
+        return 1;
+
+    if (y < 0 || y >= LEVEL_HEIGHT_CELLS)
+        return 0;
+
+    return mapdata[x][y];
+}
+
+/* Adapted from levels.h */
+int8_t gridGetTile(int8_t x, int8_t y)
+{
+    if (!gridGetSolid(x, y)) return 16;
+
+    int8_t l, r, t, b, f;
+    l = gridGetSolid(x - 1, y);
+    t = gridGetSolid(x, y - 1);
+    r = gridGetSolid(x + 1, y);
+    b = gridGetSolid(x, y + 1);
+
+    f = 0;
+    f = r | (t << 1) | (l << 2) | (b << 3);
+
+    return f;
+}
+
+Image generate_map(const uint8_t * map, size_t length)
+{
+    /* Image format is a block of tile data, followed by
+     * packged information on objects within the map.
+     * 
+     * Although the map has a scheme ending in 0xff, this
+     * function still takes the array length as a parameter for safety */
+     
+    /* Load the map first, because we will eventually need to compare
+     * adjacent tiles when rendering. */
+     load_map_cells(map);
     
     /* Generate map image now */
     Image mapimg(Geometry(LEVEL_WIDTH, LEVEL_HEIGHT), Color("white"));
@@ -123,21 +157,11 @@ Image generate_map(const uint8_t * map, size_t length)
     {
         for (size_t x = 0; x < LEVEL_WIDTH_CELLS; x++)
         {
-            if (mapdata[x][y])
-            {
-                mapimg.composite(tiles[15], 
-                    x * LEVEL_CELLSIZE, y * LEVEL_CELLSIZE, 
-                    AtopCompositeOp);
-            }
-            else
-            {
-                mapimg.composite(tiles[16], 
-                    x * LEVEL_CELLSIZE, y * LEVEL_CELLSIZE, 
-                    AtopCompositeOp);
-            }
+            mapimg.composite(tiles[gridGetTile(x, y)], 
+                x * LEVEL_CELLSIZE, y * LEVEL_CELLSIZE, 
+                AtopCompositeOp);
         }
     }
-    
     
     return mapimg;
 }
