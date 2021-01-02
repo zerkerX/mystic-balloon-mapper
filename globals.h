@@ -31,3 +31,12 @@ SOFTWARE.
 #define LEVEL_WIDTH_CELLS            24
 #define LEVEL_HEIGHT_CELLS           24
 #define LEVEL_CELLSIZE               16
+#define LEVEL_CELL_BYTES             (LEVEL_WIDTH_CELLS * LEVEL_HEIGHT_CELLS) >> 3
+
+#define LFINISH 1 << 5
+#define LWALKER 2 << 5
+#define LFAN    3 << 5
+#define LSPIKES 4 << 5
+#define LCOIN   5 << 5
+#define LKEY    6 << 5
+

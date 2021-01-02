@@ -86,6 +86,9 @@ static std::vector<Image> kid;
 static std::vector<Image> walker;
 static std::vector<Image> fanimg;
 static std::vector<Image> spikes;
+static std::vector<Image> key;
+static std::vector<Image> doorimg;
+static std::vector<Image> elemimg;
 
 /* Static loaded map so we can easily share among several subroutines */
 static uint8_t mapdata[LEVEL_WIDTH_CELLS][LEVEL_HEIGHT_CELLS] = {0};
@@ -138,6 +141,61 @@ int8_t gridGetTile(int8_t x, int8_t y)
     return f;
 }
 
+class ObjectPlacer
+{
+    public:
+        ObjectPlacer(const uint8_t * map, size_t & i)
+        {
+            /* Extract parameters and increment position */
+            id = map[i] & 0xE0;
+            y = map[i] & 0x1F;
+            x = map[i+1] & 0x1F;
+            extra = map[i+1] >> 5;
+            
+            if (id == LFAN)
+            {
+                extra = map[i+2];
+                i += 3;
+            }
+            else i += 2;
+        }
+        
+        void draw(Image & img)
+        {
+            switch(id)
+            {
+            case LCOIN:
+                drawCoin(img);
+                break;
+            case LKEY:
+                drawKey(img);
+                break;
+            default:
+                break;
+            }
+        }
+        
+    protected:
+        uint8_t id;
+        uint8_t y;
+        uint8_t x;
+        uint8_t extra;
+        
+        void drawCoin(Image & img)
+        {
+            img.composite(elemimg[0], 
+                x * LEVEL_CELLSIZE + 3, y * LEVEL_CELLSIZE, 
+                AtopCompositeOp);
+        }
+        
+        void drawKey(Image & img)
+        {
+            img.composite(elemimg[4], 
+                x * LEVEL_CELLSIZE + 3, y * LEVEL_CELLSIZE, 
+                AtopCompositeOp);
+        }
+};
+
 Image generate_map(const uint8_t * map, size_t length)
 {
     /* Image format is a block of tile data, followed by
@@ -158,9 +216,17 @@ Image generate_map(const uint8_t * map, size_t length)
         for (size_t x = 0; x < LEVEL_WIDTH_CELLS; x++)
         {
             mapimg.composite(tiles[gridGetTile(x, y)], 
-                x * LEVEL_CELLSIZE, y * LEVEL_CELLSIZE, 
+                x * LEVEL_CELLSIZE + 3, y * LEVEL_CELLSIZE, 
                 AtopCompositeOp);
         }
+    }
+    
+    /* Now overlay objects onto the map image, ignoring the last 0xff position */
+    size_t i = LEVEL_CELL_BYTES;
+    while (i < length - 1)
+    {
+        ObjectPlacer obj(map, i);
+        obj.draw(mapimg);        
     }
     
     return mapimg;
@@ -177,6 +243,8 @@ int main(int argc,char **argv)
     walker = load_arduboy(walkerSprite, sizeof(walkerSprite));
     fanimg = load_arduboy(fan, sizeof(fan));
     spikes = load_arduboy(sprSpikes, sizeof(sprSpikes));
+    doorimg = load_arduboy(door, sizeof(door));
+    elemimg = load_arduboy(elements, sizeof(elements));
     
     /* TODO: Re-combine the title screen image? */
     std::vector<Image> title = load_arduboy(titleScreen, sizeof(titleScreen));
@@ -188,6 +256,8 @@ int main(int argc,char **argv)
     writeImages(spikes.begin(), spikes.end(), "sprSpikes.gif");
     writeImages(fanimg.begin(), fanimg.end(), "fan.gif");
     writeImages(tiles.begin(), tiles.end(), "tileSetTwo.gif");
+    writeImages(doorimg.begin(), doorimg.end(), "door.gif");
+    writeImages(elemimg.begin(), elemimg.end(), "elements.gif");
     
     /* Generate image for map 1 */
     generate_map(level1, sizeof(level1)).write("level1.png");
