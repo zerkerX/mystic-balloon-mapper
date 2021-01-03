@@ -341,7 +341,6 @@ Image generate_map(const uint8_t * map, size_t length)
     return mapimg;
 }
 
-
 int main(int argc,char **argv)
 { 
     InitializeMagick(*argv);
@@ -355,9 +354,11 @@ int main(int argc,char **argv)
     doorimg = load_arduboy(door, sizeof(door));
     elemimg = load_arduboy(elements, sizeof(elements));
     
-    /* TODO: Re-combine the title screen image? */
+    /* Re-combine the title screen image */
     std::vector<Image> title = load_arduboy(titleScreen, sizeof(titleScreen));
-    writeImages(title.begin(), title.end(), "titleScreen.gif");
+    Image completeTitle;
+    appendImages(&completeTitle, title.begin(), title.end());
+    completeTitle.write("title.png");
 
     /* Save sprites to disk to confirm behaviour */
     writeImages(kid.begin(), kid.end(), "kidSprite.gif");

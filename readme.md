@@ -4,9 +4,9 @@ the Arduboy platformer by the former Team a.r.g. When I was playing the game,
 I got a bit lost in some levels due to the limited viewing area, so I thought
 it would be fun to make a map generator tool.
 
-This tool generates maps for all defined levels in bitmaps.h. It also write a
+This tool generates maps for all defined levels in bitmaps.h. It also writes a
 few sprite images to disk just for fun, even if those can easily be found
-at the official repo as well. All maps and bitmaps are stored directly in
+at the official repository as well. All maps and bitmaps are stored directly in
 the C source code as data arrays.
 
 The mapper is written in C++, and aside from a C++ compiler
