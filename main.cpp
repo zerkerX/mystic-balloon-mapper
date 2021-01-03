@@ -170,6 +170,16 @@ class ObjectPlacer
             case LKEY:
                 drawKey(img);
                 break;
+            case LSTART:
+                drawKid(img);
+                break;
+            case LFINISH:
+                drawDoor(img);
+                break;
+            case LWALKER:
+                drawWalker(img);
+                break;
+            /* TODO Spikes and Fans */
             default:
                 break;
             }
@@ -194,6 +204,27 @@ class ObjectPlacer
                 x * LEVEL_CELLSIZE + 3, y * LEVEL_CELLSIZE, 
                 AtopCompositeOp);
         }
+        
+        void drawKid(Image & img)
+        {
+            img.composite(kid[0], 
+                x * LEVEL_CELLSIZE + 2, y * LEVEL_CELLSIZE, 
+                AtopCompositeOp);
+        }
+        
+        void drawDoor(Image & img)
+        {
+            img.composite(doorimg[0], 
+                x * LEVEL_CELLSIZE, y * LEVEL_CELLSIZE, 
+                AtopCompositeOp);
+        }
+        
+        void drawWalker(Image & img)
+        {
+            img.composite(walker[0], 
+                x * LEVEL_CELLSIZE + 4, y * LEVEL_CELLSIZE + 8, 
+                AtopCompositeOp);
+        }
 };
 
 Image generate_map(const uint8_t * map, size_t length)
@@ -216,7 +247,7 @@ Image generate_map(const uint8_t * map, size_t length)
         for (size_t x = 0; x < LEVEL_WIDTH_CELLS; x++)
         {
             mapimg.composite(tiles[gridGetTile(x, y)], 
-                x * LEVEL_CELLSIZE + 3, y * LEVEL_CELLSIZE, 
+                x * LEVEL_CELLSIZE, y * LEVEL_CELLSIZE, 
                 AtopCompositeOp);
         }
     }

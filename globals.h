@@ -33,6 +33,7 @@ SOFTWARE.
 #define LEVEL_CELLSIZE               16
 #define LEVEL_CELL_BYTES             (LEVEL_WIDTH_CELLS * LEVEL_HEIGHT_CELLS) >> 3
 
+#define LSTART  0
 #define LFINISH 1 << 5
 #define LWALKER 2 << 5
 #define LFAN    3 << 5
