@@ -1,6 +1,6 @@
 This is a utility to generate maps for 
 [Mystic Balloon](https://github.com/Team-ARG-Museum/ID-34-Mystic-Balloon),
-the Arduboy platformer by the former Team a.r.g. When I was playing the game,
+the [Arduboy](https://arduboy.com/) platformer by the former Team a.r.g. When I was playing the game,
 I got a bit lost in some levels due to the limited viewing area, so I thought
 it would be fun to make a map generator tool.
 
