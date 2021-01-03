@@ -788,7 +788,7 @@ const uint8_t level1 [] PROGMEM = {
   0xFF
 };
 
-/*const uint8_t level1[] PROGMEM = {
+const uint8_t level1old[] PROGMEM = {
     // Tiles
     0x00, 0x00, 0x00, 0x00, 0xE0, 0x01, 0xF7, 0xE6, 0x01, 
     0x30, 0x06, 0x00, 0x30, 0x06, 0x00, 0x30, 0x26, 0x00, 
@@ -805,7 +805,7 @@ const uint8_t level1 [] PROGMEM = {
     
    // EoL
     0xFF
-};*/
+};
 
 
 
@@ -979,8 +979,7 @@ const uint8_t level10 [] PROGMEM = {
   0xFF
 };
 
-#ifndef HARD_MODE
-const uint8_t level11[] PROGMEM = {
+const uint8_t level11hard[] PROGMEM = {
     // Tiles
     0x70, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
     0x07, 0x98, 0x00, 0x07, 0x98, 0x01, 0x70, 0x98, 0x03, 
@@ -998,7 +997,7 @@ const uint8_t level11[] PROGMEM = {
    // EoL
     0xFF
 };
-#else
+
 const uint8_t level11 [] PROGMEM = { // hard mode level 11
   // Tiles
   0x70, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
@@ -1018,7 +1017,6 @@ const uint8_t level11 [] PROGMEM = { // hard mode level 11
   // EoL
   0xFF
 };
-#endif
 
 const uint8_t level12 [] PROGMEM = {
   // Tiles
